@@ -5,6 +5,10 @@
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
+if !Vagrant.has_plugin?("vagrant-proxyconf") 
+	system('vagrant plugin install vagrant-proxyconf')          
+	raise("vagrant-proxyconf installed. Run command again.");
+end
 Vagrant.configure("2") do |config|
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
@@ -14,21 +18,37 @@ Vagrant.configure("2") do |config|
   # boxes at https://atlas.hashicorp.com/search.
   # config.vm.box = "debian/jessie64"
 
+    if Vagrant.has_plugin?("vagrant-proxyconf")
+	config.proxy.http     = "http://proxy-c.cornelsen.de:80/"
+	config.proxy.https    = "http://proxy-c.cornelsen.de:80/"
+        config.proxy.no_proxy = "localhost,127.0.0.1,.cornelsen.de"
+    end
+
+  config.vm.provision "ansible" do |ansible|
+        ansible.verbose = "v"
+	ansible.playbook = "ansible/playbook.yml"
+	ansible.groups = {
+		"gr_web" => ["stage", "prod1", "prod2"],
+		"gr_db"  => ["prod2"],
+		"gr_all" => ["gitlab", "prod1", "prod2", "stage"]
+	}
+  end
 
   config.vm.define "gitlab" do |gitlab|
 	gitlab.vm.box = "debian/jessie64"
+	gitlab.vm.hostname = "gitlab"
   end
-
   config.vm.define "staging" do |stage|
 	stage.vm.box = "debian/jessie64"
+	stage.vm.hostname = "stage"
   end
-
   config.vm.define "prod1_wordpress" do |prod1|
 	prod1.vm.box = "debian/jessie64"
+	prod1.vm.hostname = "prod1"
   end
-
   config.vm.define "prod2_wiki" do |prod2|
 	prod2.vm.box = "debian/jessie64"
+	prod2.vm.hostname = "prod2"
   end
 
 

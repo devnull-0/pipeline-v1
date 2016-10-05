@@ -1,0 +1,26 @@
+---
+- name: basic setup
+  hosts: gr_all
+  #become_method: sudo
+  #become_user: root
+  sudo: True
+  vars:
+    env:
+       http_proxy: http://proxy-c.cornelsen.de:80
+       https_proxy: http://proxy-c.cornelsen.de:80
+  tasks:
+    - name: install vim
+      apt:
+        name=vim
+        state=present
+      environment:
+                     http_proxy:  http://proxy-c.cornelsen.de:80
+                     https_proxy: http://proxy-c.cornelsen.de:80
+    - name: install rsync
+      apt:
+        name=rsync
+        state=present
+      environment:
+                     http_proxy:  http://proxy-c.cornelsen.de:80
+                     https_proxy: http://proxy-c.cornelsen.de:80
+
